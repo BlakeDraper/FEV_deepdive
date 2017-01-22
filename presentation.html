@@ -1,0 +1,577 @@
+<!doctype html>
+<html  lang="en">
+   <head>
+        <meta charset="utf-8">
+
+        <title>FEV Deepdive</title>
+
+        <meta name="description" content="Presentation for Coastal GeoTools 2017 - Flood Event Viewer">
+        <meta name="author" content="Blake Draper">
+
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.css">
+        <link rel="stylesheet" href="css/theme/black.css" id="theme">
+        <link rel="stylesheet" href="css/main.css">
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h3>Flood event viewer</h2>
+
+                    <img height="250" data-src="images/FEVCap_replace.PNG" alt="FEV screenshot">
+
+                    <p>
+                        <small>Presented by <a href="https://www.linkedin.com/in/blakedraper/">Blake Draper</a> - <a href="https://github.com/usgs-wim">USGS Web Informatics and Mapping (WiM)</a></small>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Short-Term Network (STN) and FEV</h2>
+
+                    <h6>What is STN?</h6>
+                    <p class="fragment">a system for collection, management and dissemination of flood data </p>
+
+                    <br>
+                    <br>
+
+                    <p class="fragment">FEV is the <span class="publicHighlight">public</span> data viewing tool for the STN database</p>
+
+
+                </section>
+
+                 <section>
+                    
+                    <h2>The STN Universe</h2>
+
+                     <img height="450" data-src="images/image-placeholder.png" alt="STN universe">
+                     <p>diagram of STN universe</p>
+
+                </section>
+
+
+                <section>
+                    <h2>Cooperator</h2>
+
+                    <p>USGS Office of Surface Water </p>
+
+                    <p class="fragment">POC: Marie Peppler / Todd Koenig </p>
+
+                    <p class="fragment">Funded largely by Hurricane Sandy money </p>
+
+                </section>
+
+                <section data-background-image="images/ireneMapper.PNG" data-background-size="contain">
+                    
+                    <div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+                        <!-- <h2>Short-Term Network (STN)</h2>
+                        <h6>Origins</h6> -->
+                        <p>Hurricane Irene Mapper (2011)</p>
+                    </div>
+
+                </section>
+
+                  <section data-background-image="images/stnThumbnail.PNG" data-background-size="contain">
+                    
+                    <div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+                        <h2>Legacy FEV</h2>
+                        <p>Version 1, born ~2012</p>
+                    </div>
+        
+                </section>
+
+                 <section>
+                    <h3>Audience</h3>
+                    <p class="fragment">used extensively by USGS personnel</p>
+                    <p class="fragment">designed with public in mind</p>
+                    <h3 class="fragment">Lifecyle</h3>
+                    <p class="fragment">FEV - indefinitely</p>
+                    <p class="fragment">this version - 4-5 years?</p>
+
+                </section>
+
+                 <section>
+                    <h3>Architecture</h3>
+                    <img height="550" data-src="images/FEV_architecture.png" alt="FEV architecture diagram" style="border:none; border-radius:25px">
+
+                </section>
+
+                 <section>
+                    <h3>Code Structure</h3>
+                    <p class="fragment">pretty basic because just JS/jQuery/Bootstrap</p>
+                    <p class="fragment">src JS split into 3 files</p>
+                    <ul>
+                        <li class="fragment">core.js</li>
+                        <li class="fragment">populate.js</li>
+                        <li class="fragment">query.js</li>
+
+                    </ul>
+                    <br>
+                    <div class="fragment">
+                     <p class="fragment">gulp build system</p>
+                     <ul>
+                      <li>combined.js</li>
+                        <li>vendor.js</li>
+                         <li>vendor.css</li>
+                     </ul>
+                    </div>
+
+
+                </section>
+
+
+
+                <section>
+                    <h2>Selected Code review</h2>
+                    <pre>
+                        <code class="hljs" data-trim contenteditable>
+//listener for submit event button on welcome modal - sets event vars and passes event id to filterMapData function
+	$('#btnSubmitEvent').click(function(){
+		//check if an event has been selected
+		if ($('#evtSelect_welcomeModal').val() !== null) {
+			//if event selected, hide welcome modal and begin filter process
+			$('#welcomeModal').modal('hide');
+			var eventID = $('#evtSelect_welcomeModal').val()[0];
+			$('#evtSelect_filterModal').val([eventID]).trigger("change");
+			//retrieve event details
+			$.getJSON( 'https://stn.wim.usgs.gov/STNServices/events/' + eventID + '.json', {} )
+				.done(function( data ) {
+					setEventVars(data.event_name, data.event_id, data.event_status_id, data.event_start_date, data.event_end_date);
+				})
+				.fail(function() {
+					console.log( "Request Failed. Most likely invalid event name." );
+				});
+			//populateEventDates(eventID);
+			filterMapData(eventID, false);
+		} else {
+			//if no event selected, warn user with alert
+			//alert("Please choose an event to proceed.")
+			$('.eventSelectAlert').show();
+		}
+	});
+
+	//listener for submit filters button on filters modal - sets event vars and passes event id to filterMapData function
+	$('#btnSubmitFilters').on('click', function() {
+
+		if ($('#evtSelect_filterModal').val() !== null) {
+			//if event selected, hide welcome modal and begin filter process
+			$('#welcomeModal').modal('hide');
+			var eventID = $('#evtSelect_filterModal').val()[0];
+			//$('#evtSelect_filterModal').val([eventValue]).trigger("change");
+			//retrieve event details
+			for (var i = 0; i < fev.data.events.length; i++) {
+				if (fev.data.events[i].event_id == eventID) {
+					//set currentEventActive boolean var based on event_status_id value
+					setEventVars(fev.data.events[i].event_name, fev.data.events[i].event_id, fev.data.events[i].event_status_id, fev.data.events[i].event_start_date, fev.data.events[i].event_end_date);
+				}
+			}
+			filterMapData(eventID, false);
+			$('.eventSelectAlert').hide();
+			$('#filtersModal').modal('hide');
+		} else {
+			//if no event selected, warn user with alert
+			//alert("Please choose an event to proceed.")
+			$('.eventSelectAlert').show();
+		}
+	});
+
+	//'listener' for URL event params - sets event vars and passes event id to filterMapData function
+	if (window.location.hash){
+		//user has arrived with an event name after the hash on the URL
+		//grab the hash value, remove the '#', leaving the event name parameter
+		var eventParam = window.location.hash.substring(1);
+		//retrieve event details
+		$.getJSON( 'https://stn.wim.usgs.gov/STNServices/events/' + eventParam + '.json', {} )
+			.done(function( data ) {
+				var eventID = data.event_id.toString();
+				setEventVars(data.event_name, data.event_id, data.event_status_id, data.event_start_date, data.event_end_date);
+				//call filter function, passing the eventid parameter string and 'true' for the 'isUrlParam' boolean argument
+				filterMapData(eventID, true);
+			})
+			.fail(function() {
+				console.log( "Request Failed. Most likely invalid event name." );
+			});
+
+	} else {
+		//show modal and set options - disallow user from bypassing
+		$('#welcomeModal').modal({backdrop: 'static', keyboard: false});
+	}
+                        </code>
+                    </pre>
+                </section>
+
+                 <section data-background-image="images/codeSnip.PNG" data-background-size="contain">
+                  <h2 class="fragment">Code review
+                       <span style=" display:inline-block;">
+                                    <img src="images/party_parrot.gif" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span>
+                  </h2>
+                    <!--<img height="500" data-src="images/codeSnip.PNG" alt="FEV code snip">-->
+                </section>
+
+
+
+                <section data-background-image="images/precious.gif" data-background-size="contain">
+                 <div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+                        <p>Questions?</p>
+                 </div>
+                </section>
+
+                
+
+
+                <section>
+                    
+                    <h2>Event-Centrism</h2>
+
+                     <img height="250" data-src="images/selectEvt_dropdwn.PNG" alt="FEV screenshot">
+
+                        <p class="fragment">all data gets associated with an event </p>
+
+                        <p class="fragment">Water Science Centers and the press want event-focused map</p>
+
+
+                    <!-- </ul> -->
+
+                </section>
+
+                
+
+              <!------------------------------------------------------------------------------------------------------------->
+
+                <section data-background-image="images/FEVCap_replace.PNG" data-background-size="contain">
+                    
+                    <div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+                        <h2>Flood Event Viewer</h2>
+                        <p>The Data</p>
+                    </div>
+        
+                </section>
+
+
+                <section> 
+                    <div style="float:left; width:33.3%">
+
+                        <h3><span style="text-transform:initial">Real-time</span></h3>
+
+                        <ul style="font-size:24pt" class="fragment">
+                                <span style=" display:inline-block;">
+                                    <img src="images/nwis.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Real-time Stream Gage<br>
+
+                                <span style=" display:inline-block;">
+                                    <img src="images/rdg.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Rapid Deployment Gage<br>
+        
+                        </ul>
+
+                    </div>
+
+                    <div style="float:left; width:33.3%">
+                         <h3><b><span style="text-transform:initial; font-weight:bold">Observed</b></span></h3>
+
+                        <p class="fragment">Sensors</p>
+                        <ul style="font-size:24pt" class="fragment">
+                            
+                                <span style=" display:inline-block;">
+                                    <img src="images/baro.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Barometric Pressure<br>
+
+                                <span style=" display:inline-block;">
+                                    <img src="images/stormtide.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Storm Tide<br>
+
+                                <span style=" display:inline-block;">
+                                    <img src="images/met.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Meteorological<br>
+
+                                <span style=" display:inline-block;">
+                                    <img src="images/waveheight.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Wave Height<br>
+
+                        </ul>
+                        <br>
+                        <br>
+                        <div class="fragment" >
+                             <p>Surveyed</p>
+                            <ul style="font-size:24pt">
+                                <span style=" display:inline-block;">
+                                        <img src="images/hwm.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> High-water Marks
+                            </ul>
+                        </div>
+                       
+
+                    </div>
+
+                    <div style="float:left; width:33.3%">
+                         <h3><span style="text-transform:initial">Interpreted</span></h3>
+
+                        <ul style="font-size:24pt" class="fragment">
+                                <span style=" display:inline-block;">
+                                    <img src="images/peak.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                                </span> Peak Summary<br>
+        
+                        </ul>
+
+                    </div>
+                </section>
+
+                <section> 
+                   <h2><span style="text-transform:initial">Real-time Data</span></h2>
+
+                   <ul>
+                        <span style=" display:inline-block;">
+                            <img src="images/nwis.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Real-time Stream Gage<br>
+
+                        <span style=" display:inline-block;">
+                            <img src="images/rdg.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Rapid Deployment Gage<br>
+  
+                   </ul>
+                </section>
+
+                <!--<section data-background-image="images/rtLayer.PNG" data-background-size="45% auto" data-background-position="3em 50% no-repeat"> -->
+                <section> 
+                   <h2> <span style="text-transform:initial">Real-time Stream Gage layer</span></h2>
+
+                    <div>
+                        <img height="475" data-src="images/rtLayer.PNG" alt="Real-time streamgages layer">  
+                    </div>
+
+                    <p class="no-margin" style="margin:0px;">uses NWIS web services</p>
+                     <!--<div style="background-image: url(images/rtLayer.PNG); height: 550px;  background-repeat: no-repeat; left:50%">-->
+                </section>
+
+
+                 <section> 
+                   <h2><span style="text-transform:initial">Rapid deployment Gage layer</span></h2>
+
+                    <div>
+                        <img height="425" data-src="images/rdgLayer.PNG" alt="Real-time streamgages layer">  
+                    </div>
+
+                    <p class="no-margin" style="margin:0px;">metadata in STN - time series data in NWIS</p>
+
+                </section>
+
+
+                <section> 
+                   <h2><span style="text-transform:initial">Observed Data</span></h2>
+
+                   <p>Sensors</p>
+                   <ul>
+                       
+                        <span style=" display:inline-block;">
+                            <img src="images/baro.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Barometric Pressure<br>
+
+                        <span style=" display:inline-block;">
+                            <img src="images/stormtide.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Storm Tide<br>
+
+                         <span style=" display:inline-block;">
+                            <img src="images/met.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Meteorological<br>
+
+                         <span style=" display:inline-block;">
+                            <img src="images/waveheight.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Wave Height<br>
+
+                   </ul>
+                   <br>
+                   <br>
+                   <p>Surveyed</p>
+                    <span style=" display:inline-block;">
+                            <img src="images/hwm.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> High-water Marks
+                </section>
+
+
+                 <section> 
+                   <h2> <span style="text-transform:initial">Sensor layers</span></h2>
+
+                    <div>
+                        <img height="475" data-src="images/sensorLayers.PNG" alt="Peak summary layer">  
+                    </div>
+
+
+
+                    <div class="sl-block" data-block-type="text" data-block-id="032ea35b8cfb4c8d7b60d36519e5f7c1" style="height: auto; min-width: 30px; min-height: 30px; width: 359px; left: 560px; top: 45px;">
+                        <div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; padding: 20px; font-size: 120%; border: 2px solid black; color: rgb(255, 255, 255); transition-duration: 0.6s; transition-delay: 0.6s; background-color: rgb(13, 5, 36);" data-animation-type="slide-left">
+                            <p style="text-align: right;"><span style="font-size:0.9em">It appears that</span></p>
+
+                            <p style="text-align: right;"><span style="font-size:0.9em"><strong>Javascript's</strong> doin a</span></p>
+
+                            <p style="text-align: right;"><span style="font-size:1.4em"><em>NEW THANG</em></span></p>
+                        </div>
+                    </div>
+
+
+                </section>
+
+                <section data-background-image="images/sensorDataPage.PNG" data-background-size="contain"> 
+                   <div class="fragment"style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+                       <ul>
+                           <li >metadata</li>
+                           <li class="fragment">raw data files</li>
+                           <li class="fragment">photos</li>
+                       </ul>
+                        
+                    </div>
+
+                </section>
+
+                 <section> 
+                   <h2> <span style="text-transform:initial">High-water Mark layer</span></h2>
+
+                    <div>
+                        <img height="425" data-src="images/hwmLayer.PNG" alt="High-water mark layer">  
+                    </div>
+
+                    <p class="no-margin" style="margin:0px;">observed & surveyed</p>
+                    <p class="no-margin" style="margin:0px;">historic HWM effort underway</p>
+
+                </section>
+
+                <section> 
+                   <h2><span style="text-transform:initial">Interpreted Data</span></h2>
+
+                   <ul>
+                        <span style=" display:inline-block;">
+                            <img src="images/peak.png" style="margin:0;background:none;border:none;b0x-shadow:none;"></img>
+                        </span> Peak Summary<br>
+  
+                   </ul>
+                </section>
+
+                <section> 
+                   <h2> <span style="text-transform:initial">Peak Summary layer</span></h2>
+
+                    <div>
+                        <img height="400" data-src="images/peakLayer.PNG" alt="Peak summary layer">  
+                    </div>
+
+                    <p class="no-margin" style="margin:0px;">calculated after the event</p>
+                    <p class="no-margin" style="margin:0px;">determined by storm tide sensors</p>
+                     <!--<div style="background-image: url(images/rtLayer.PNG); height: 550px;  background-repeat: no-repeat; left:50%">-->
+                </section>
+
+                <section data-background-image="images/fevSensors.PNG" data-background-size="contain"> 
+                
+
+                </section>
+
+                <section> 
+                  <h2>Getting Data</h2>
+
+                    <div>
+                        
+                        <div class="left">
+                            <img height="500" data-src="images/getdatapanel.png" alt="FEV get data panel">
+                        </div>
+
+                        <div class="right">
+                            <p class="fragment">download CSV</p>
+                            <br>
+                            <p class="fragment">get JSON</p>
+                        </div>
+
+                    
+                    </div>
+
+                </section>
+
+                 <section data-background-image="images/FEVCap_replace.PNG" data-background-size="contain">
+                    
+                    <div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 5px;">
+                        <h2>Flood Event Viewer</h2>
+                        <p>The Release</p>
+                    </div>
+
+                    <div class="fragment" style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 5px; margin:10px">
+                        Original plan: late October/early November 2016
+                    </div>
+        
+                </section>
+
+                
+                <section data-background-image="images/matthew.jpg" data-background-size="contain">
+                    <div class="fragment" style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 5px;">
+                        <p>USGS Storm Team activated October 3rd</p>
+                    </div>
+                     <div class="fragment" style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 5px; margin:10px">
+                       <p>FEV v2 alpha released later that day</p>
+                    </div>
+                     <div class="fragment" style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 5px; margin:10px">
+                        <p>FEV 2.0 offically released October 5th</p>
+                    </div>
+                </section>
+
+                <section data-background-image="images/evilMatthew.jpg" data-background-size="contain">
+                    <div class="fragment" style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 0px; width:600px; position:absolute; top:95px;">
+                        <p>Matthew arrives October 7th</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Success and Publicity</h3>
+                    <p class>used by USGS storm team on daily coordination calls</p>
+                    <div class="fragment">
+                         <img  height="300" data-src="images/lowryFEVTweet.PNG" alt="STN universe">
+                    <p>tweeted by The Weather Channel's hurricane specialist</p>
+                    </div>
+                    <p class="fragment">featured on WJXT News 4 Jax in Jacksonville, FL</p>
+                </section>
+
+               
+
+                <section>
+                    <h3>Work in progress</h3>
+                    <p>still making improvements</p>
+                    <p class="fragment">UI/UX challenges</p>
+                    <p class="fragment">multi-event view is a challenge</p>
+                </section>
+
+                <section>
+                    <h2>Conclusion</h2>
+                    <p class="fragment">successful at its critical function</p>
+                    <p class="fragment">room for improvement</p>
+                    <p class="fragment">must avoid scope creep</p>
+                </section>
+
+                <section>
+                    <h2>Questions</h2>
+                    
+                </section>
+
+            </div>
+        </div>
+        <script src="js/reveal.js"></script>
+        <script>
+            Reveal.initialize();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "gc17_presentation",
+  "version": "0.0.1",
+  "main": [
+    "js/reveal.js",
+    "css/reveal.css"
+  ],
+  "license": "MIT",
+  "description": "Presentation for Coastal GeoTools 2017 - Flood Event Viewer",
+  "authors": [
+    "Blake Draper <bdraper@usgs.gov>"
+  ],
+  "dependencies": {
+    "headjs": "~1.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/BlakeDraper/CG17_Presentation.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ]
+}
