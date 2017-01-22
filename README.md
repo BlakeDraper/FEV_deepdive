@@ -1,2 +1,2 @@
-# CG17_Presentation
-reveal.js-based presentation of FEV for Coastal GeoTools 2017
+# FEV_deepdive
+reveal.js-based 'deepdive' presentation of FEV for WiM staff, January 2017
